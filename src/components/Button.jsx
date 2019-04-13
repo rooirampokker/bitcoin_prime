@@ -5,6 +5,7 @@ class Button extends Component {
        super(props);
        this.title = props.title ? props.title : 'Click Me';
        this.action = props.action;
+       this.type = props.type;
        this.state = {
 
        }
@@ -15,7 +16,7 @@ class Button extends Component {
             <>
                 <button
                     value='submit'
-                    type='submit'
+                    type={this.type}
                     id='submit'
                     onClick={this.action}
                     className='btn btn-primary'>
