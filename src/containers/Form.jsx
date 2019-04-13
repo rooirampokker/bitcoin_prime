@@ -92,8 +92,7 @@ class FormContainer extends Component {
                             selected={this.state.toDate}
                             onChange={this.handleToDate}
                             id='toDate'
-                            className='form-control'
-                        />
+                            className='form-control'/>
                     </Col>
                 </Row>
                 <Row>
