@@ -1,8 +1,7 @@
 import React, {Component} from 'react';
 import Button  from '../components/Button';
 import DatePicker from 'react-datepicker';
-import { Row, Col } from 'react-bootstrap';
-import { Glyphicon } from "react-bootstrap-tools";
+import { Row, Col, Card } from 'react-bootstrap';
 import 'react-datepicker/dist/react-datepicker.css';
 import 'bootstrap/dist/css/bootstrap.css';
 import Moment from 'moment';
@@ -36,23 +35,12 @@ class FormContainer extends Component {
 /*
 *
  */
-    fetchParams(formData, headers) {
-        return {
-            method: 'POST',
-            body: formData,
-            headers: headers,
-            credentials: 'include'
-        }
-    }
-/*
-*
- */
     formSubmit(e) {
         let monthsApart = Moment(this.state.toDate).diff(Moment(this.state.fromDate), 'months', true);
         if (monthsApart > 6) {
          alert("please ensure that start and end dates are no more than 6 months apart");
         } else {
-            alert(true);
+            alert("pass dates to API for processing...");
         }
         // e.preventDefault();
         // let formData = new FormData();
@@ -70,41 +58,50 @@ class FormContainer extends Component {
 */
     render() {
         return (
-            <form>
-                <Row>
-                   <Col md={1}>
-                       <label>From: </label>
-                   </Col>
-                   <Col md={11}>
-                       <DatePicker
-                            selected={this.state.fromDate}
-                            onChange={this.handleFromDate}
-                            id='fromDate'
-                            className='form-control'/>
-                   </Col>
-                </Row>
-                <Row>
-                    <Col md={1}>
-                        <label>To: </label>
-                    </Col>
-                    <Col md={11}>
-                        <DatePicker
-                            selected={this.state.toDate}
-                            onChange={this.handleToDate}
-                            id='toDate'
-                            className='form-control'/>
-                    </Col>
-                </Row>
-                <Row>
-                    <Col md={3}>
-                        <Button
-                            title  = 'Submit'
-                            type   = 'button'
-                            action = {this.formSubmit}
-                        />
-                    </Col>
-                </Row>
-            </form>
+            <Card>
+                <Card.Body>
+                    <Card.Title>
+                           Specify a to and from date
+                    </Card.Title>
+                    <Card.Text>
+                        <form>
+                            <Row>
+                               <Col md={1}>
+                                   <label>From: </label>
+                               </Col>
+                               <Col md={11}>
+                                   <DatePicker
+                                        selected={this.state.fromDate}
+                                        onChange={this.handleFromDate}
+                                        id='fromDate'
+                                        className='form-control'/>
+                               </Col>
+                            </Row>
+                            <Row>
+                                <Col md={1}>
+                                    <label>To: </label>
+                                </Col>
+                                <Col md={11}>
+                                    <DatePicker
+                                        selected={this.state.toDate}
+                                        onChange={this.handleToDate}
+                                        id='toDate'
+                                        className='form-control'/>
+                                </Col>
+                            </Row>
+                            <Row>
+                                <Col md={3}>
+                                    <Button
+                                        title  = 'Submit'
+                                        type   = 'button'
+                                        action = {this.formSubmit}
+                                    />
+                                </Col>
+                            </Row>
+                        </form>
+                    </Card.Text>
+                </Card.Body>
+            </Card>
         );
     }
 }
