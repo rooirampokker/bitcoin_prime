@@ -1,47 +1,35 @@
 import React, {Component} from 'react';
 import Button  from '../components/Button';
-import DatePicker from 'react-datepicker';
+import DatePickerComp from '../components/DatePickerComp';
 import { Row, Col, Card } from 'react-bootstrap';
 import 'react-datepicker/dist/react-datepicker.css';
 import 'bootstrap/dist/css/bootstrap.css';
 import Moment from 'moment';
 
 
+
 class FormContainer extends Component {
     constructor(props) {
         super(props);
+        this.apiUrl             = 'https://rest.coinapi.io/';
+        this.setSelectedDate    = this.setSelectedDate.bind(this);
+        this.formSubmit          = this.formSubmit.bind(this);
         this.state = {
-            fromDate: new Date(),
-            toDate: new Date()
-        };
-        this.apiUrl             = 'https://api.coindesk.com/v1/';
-        this.formSubmit         = this.formSubmit.bind(this);
-        this.handleFromDate     = this.handleFromDate.bind(this);
-        this.handleToDate     = this.handleToDate.bind(this);
-    }
-/*
-*
-*/
-    handleFromDate(fromDate) {
-        console.log(fromDate);
-        this.setState({fromDate: fromDate})
-    }
-/*
-*
-*/
-    handleToDate(toDate) {
-        this.setState({toDate: toDate})
-    }
-/*
-*
- */
-    formSubmit(e) {
-        let monthsApart = Moment(this.state.toDate).diff(Moment(this.state.fromDate), 'months', true);
-        if (monthsApart > 6) {
-         alert("please ensure that start and end dates are no more than 6 months apart");
-        } else {
-            alert("pass dates to API for processing...");
+            toDate: new Date(),
+            fromDate: new Date()
         }
+    }
+/*
+*
+*/
+    setSelectedDate(selectedDate, dateType) {
+        this.setState({[dateType]: selectedDate});
+    }
+/*
+*
+*/
+    formSubmit(e) {
+        console.log(this.validateDateSelection())
         // e.preventDefault();
         // let formData = new FormData();
         // let myHeaders = new Headers();
@@ -56,6 +44,19 @@ class FormContainer extends Component {
 /*
 *
 */
+    validateDateSelection() {
+        let monthsApart = Moment(this.state.toDate).diff(Moment(this.state.fromDate), 'months', true);
+        if (monthsApart > 6) {
+        alert("please ensure that start and end dates are no more than 6 months apart");
+        return false;
+        } else {
+            alert("pass dates to API for processing...");
+            return true;
+        }
+    }
+/*
+*
+*/
     render() {
         return (
             <Card>
@@ -63,32 +64,17 @@ class FormContainer extends Component {
                     <Card.Title>
                            Specify a to and from date
                     </Card.Title>
-                    <Card.Text>
                         <form>
-                            <Row>
-                               <Col md={1}>
-                                   <label>From: </label>
-                               </Col>
-                               <Col md={11}>
-                                   <DatePicker
-                                        selected={this.state.fromDate}
-                                        onChange={this.handleFromDate}
-                                        id='fromDate'
-                                        className='form-control'/>
-                               </Col>
-                            </Row>
-                            <Row>
-                                <Col md={1}>
-                                    <label>To: </label>
-                                </Col>
-                                <Col md={11}>
-                                    <DatePicker
-                                        selected={this.state.toDate}
-                                        onChange={this.handleToDate}
-                                        id='toDate'
-                                        className='form-control'/>
-                                </Col>
-                            </Row>
+                            <DatePickerComp
+                                id={'fromDate'}
+                                label={'From: '}
+                                action={this.setSelectedDate}
+                            />
+                            <DatePickerComp
+                                id={'toDate'}
+                                label={'To: '}
+                                action={this.setSelectedDate}
+                            />
                             <Row>
                                 <Col md={3}>
                                     <Button
@@ -99,7 +85,6 @@ class FormContainer extends Component {
                                 </Col>
                             </Row>
                         </form>
-                    </Card.Text>
                 </Card.Body>
             </Card>
         );
