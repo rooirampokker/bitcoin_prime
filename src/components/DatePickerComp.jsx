@@ -32,6 +32,8 @@ class DatePickerComp extends Component {
                     <DatePicker
                         selected={this.state.thisDate}
                         onChange={this.handleDate}
+                        //2016-01-01T00:00:00
+                        dateFormat="YYYY/MM/dd"
                         id={this.id}
                         className='form-control'/>
                 </Col>
