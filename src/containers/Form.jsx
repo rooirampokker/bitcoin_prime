@@ -15,12 +15,12 @@ class FormContainer extends Component {
         this.currency           = 'BITSTAMP_SPOT_BTC_USD';
         this.setSelectedDate    = this.setSelectedDate.bind(this);
         this.formSubmit         = this.formSubmit.bind(this);
-        this.totalTrades        = 0;
         this.state = {
             toDate: new Date().toISOString(),
             fromDate: new Date().toISOString(),
             dailyPrimes: [],
-            formSubmitted: false
+            formSubmitted: false,
+            totalTrades: 0
         }
     }
 /*
@@ -57,32 +57,47 @@ class FormContainer extends Component {
  */
     formSubmit(e) {
         e.preventDefault();
-        this.setState({formSubmitted: true});
         if(this.validateDateSelection()) {
-              // fetch(this.getTradesOverPeriod(),this.buildFetchParams())
-              //     .then(console.log("spinner on"))
-              //      .then(response => response.json())
-              //         .then((response) => {
-                            let response = this.testData(response);
+              fetch(this.getTradesOverPeriod(),this.buildFetchParams())
+                  .then(console.log("spinner on"))
+                   .then(response => response.json())
+                      .then((response) => {
+                            //let response = this.testData(response);
                             this.processResponse(response);
                             console.log('spinner off');
-                     // })
+                      })
         }
     }
 /*
-*
+* {
+*  '2011-01-01': [123,234],
+*  '2011-01-02': [456,789]
+*  ...
+* }
 */
     processResponse(response) {
-        this.totalTrades = 0;
         let dailyPrimes = [];
-        //cycles over each response item, identifies the prime numbers and loads them into an array...
+        let allPrimes = {};
+        let tradeCount = 0;
+        //cycles over each response item, identifies the prime numbers and loads them into an JSON structure...
         Object.keys(response).forEach(element => {
+            tradeCount++;
+            let thisDate = response[element].time_exchange.split("T")[0];
             let number = Math.round(response[element].price);
             if (this.isPrime(number)) {
-                dailyPrimes.push(number);
+                //just add to current date element if it already exists
+                if (allPrimes.hasOwnProperty(thisDate)) {
+                    dailyPrimes.push(number);
+                } else {//otherwise reset the daily primes and start again for the new day...
+                    dailyPrimes = [];
+                    dailyPrimes.push(number);
+                }
+                allPrimes[thisDate] = dailyPrimes;
             }
         });
-        this.setState({dailyPrimes: dailyPrimes});
+        this.setState({formSubmitted: true,
+                             dailyPrimes: allPrimes,
+                             totalTrades: tradeCount});
     }
 /*
 *
@@ -124,7 +139,7 @@ class FormContainer extends Component {
                 uuid: "41ddfe65-9e7c-4749-9f52-6f679ff20107",
             },
             {
-                price: 6,
+                price: 5,
                 size: 2.05959469,
                 symbol_id: "BITSTAMP_SPOT_BTC_USD",
                 taker_side: "BUY",
@@ -133,7 +148,7 @@ class FormContainer extends Component {
                 uuid: "fd3869eb-53eb-4f81-bccd-e51502f8284b"
             },
             {
-                price: 8,
+                price: 10,
                 size: 0.025997,
                 symbol_id: "BITSTAMP_SPOT_BTC_USD",
                 taker_side: "BUY",
@@ -143,6 +158,15 @@ class FormContainer extends Component {
             },
             {
                 price: 11,
+                size: 0.025997,
+                symbol_id: "BITSTAMP_SPOT_BTC_USD",
+                taker_side: "BUY",
+                time_coinapi: "2019-03-13T09:05:08.3046702Z",
+                time_exchange: "2019-03-13T09:05:08.0000000Z",
+                uuid: "3b7ac020-006d-4145-825d-eb8e551b655d",
+            },
+            {
+                price: 17,
                 size: 0.025997,
                 symbol_id: "BITSTAMP_SPOT_BTC_USD",
                 taker_side: "BUY",
@@ -160,9 +184,10 @@ class FormContainer extends Component {
         let outputPrime = '';
         if (this.state.formSubmitted) {
             outputPrime = <OutputPrime
-                            toDate = {this.state.toDate}
+                            toDate   = {this.state.toDate}
                             fromDate = {this.state.fromDate}
-                            primes = {this.state.dailyPrimes}
+                            primes   = {this.state.dailyPrimes}
+                            totalTrades = {this.state.totalTrades}
                           />
         }
         return (
@@ -170,7 +195,7 @@ class FormContainer extends Component {
                 <Card>
                     <Card.Body>
                         <Card.Title>
-                               Specify a to and from date
+                               Specify a to and from date and click on submit to view all rounded trades that are prime numbers
                         </Card.Title>
                             <form>
                                 <DatePickerComp

@@ -8,26 +8,42 @@ class OutputPrime extends Component {
         this.toDate = props.toDate.split("T")[0];
         this.fromDate = props.fromDate.split("T")[0];
         this.primes = props.primes;
+        this.totalTrades = props.totalTrades;
     }
-
+/*
+*
+*/
+    getTrades(tradeDate) {
+        return (this.primes[tradeDate].map((tradePrice, index) => (
+            <Row
+                key={index}>
+                <Col>{tradePrice}</Col>
+            </Row>
+        )));
+    }
+/*
+*
+ */
     render() {
+        let cardContent = 'Selected range contains no prime numbers';
+        if (Object.keys(this.primes).length) {
+            cardContent = Object.keys(this.primes).map(tradeDate => (
+                  <>
+                      <Row
+                        key={tradeDate}>
+                        <Col>{tradeDate+" (primes: "+this.primes[tradeDate].length+")"}</Col>
+                      </Row>
+                      {this.getTrades(tradeDate)}
+                  </>
+        ))
+        }
         return (
             <Card>
                 <Card.Body>
-                    {console.log(this.toDate)}
-                    {console.log(this.fromDate)}
                     <Card.Title>
-                        Prime Numbers for all trades between {this.fromDate} and {this.toDate}
+                        Prime Numbers for all trades between {this.fromDate} and {this.toDate} (Total trades over period: {this.totalTrades})
                     </Card.Title>
-                    {
-                        this.primes.map(number => {
-                            if (number) {
-                                console.log('boo');
-                            }
-                            let comp = <Row><Col>{number}</Col></Row>
-                            return comp;
-                        })
-                    }
+                    {cardContent}
                 </Card.Body>
             </Card>
         )
