@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import Button             from '../components/Button';
 import DatePickerComp     from '../components/DatePickerComp';
+import OutputPrime        from '../components/OutputPrime';
 import { Row, Col, Card } from 'react-bootstrap';
 import Moment             from 'moment';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -15,17 +16,19 @@ class FormContainer extends Component {
         this.setSelectedDate    = this.setSelectedDate.bind(this);
         this.formSubmit         = this.formSubmit.bind(this);
         this.totalTrades        = 0;
-        this.formData           =  new FormData();
         this.state = {
             toDate: new Date().toISOString(),
-            fromDate: new Date().toISOString()
+            fromDate: new Date().toISOString(),
+            dailyPrimes: [],
+            formSubmitted: false
         }
     }
 /*
 *
 */
     setSelectedDate(selectedDate, dateType) {
-        this.setState({[dateType]: selectedDate.toISOString()});
+        this.setState({[dateType]:    selectedDate.toISOString(),
+                             formSubmitted: false});
     }
 /*
 *
@@ -35,14 +38,6 @@ class FormContainer extends Component {
         myHeaders.append('X-CoinAPI-Key', this.apiKey);
         myHeaders.append('Accept', 'application/json,');
         myHeaders.append('Accept-Encoding', 'deflate, gzip');
-        //not required for GET - Must-have parameter composition for POST
-        //let thisData  = new FormData();
-        // Object.keys(this.state).forEach(key => {
-        //     this.formData.append(this[key], this.state[key]);
-        // });
-        //WORKS WELL FOR LOADING FORMDATA FOR 'POST'ing AND DISABLE BODY FOR GET - BE SURE TO DYNAMICALLY INCLUDE thisBody INTO RETURNPARAMS
-        //let thisBody = RESTMethod === 'GET' ? '' : {body: this.formData};
-
 
         let returnParams = {
                 method: RESTMethod,
@@ -62,14 +57,16 @@ class FormContainer extends Component {
  */
     formSubmit(e) {
         e.preventDefault();
+        this.setState({formSubmitted: true});
         if(this.validateDateSelection()) {
-              fetch(this.getTradesOverPeriod(),this.buildFetchParams())
-                  .then(console.log("spinner on"))
-                   .then(response => response.json())
-                      .then((response) => {
+              // fetch(this.getTradesOverPeriod(),this.buildFetchParams())
+              //     .then(console.log("spinner on"))
+              //      .then(response => response.json())
+              //         .then((response) => {
+                            let response = this.testData(response);
                             this.processResponse(response);
                             console.log('spinner off');
-                      })
+                     // })
         }
     }
 /*
@@ -77,15 +74,15 @@ class FormContainer extends Component {
 */
     processResponse(response) {
         this.totalTrades = 0;
-        this.dailyPrimes = [];
+        let dailyPrimes = [];
         //cycles over each response item, identifies the prime numbers and loads them into an array...
         Object.keys(response).forEach(element => {
             let number = Math.round(response[element].price);
             if (this.isPrime(number)) {
-                this.dailyPrimes.push(number);
+                dailyPrimes.push(number);
             }
         });
-        console.log(this.dailyPrimes);
+        this.setState({dailyPrimes: dailyPrimes});
     }
 /*
 *
@@ -127,7 +124,7 @@ class FormContainer extends Component {
                 uuid: "41ddfe65-9e7c-4749-9f52-6f679ff20107",
             },
             {
-                price: 5,
+                price: 6,
                 size: 2.05959469,
                 symbol_id: "BITSTAMP_SPOT_BTC_USD",
                 taker_side: "BUY",
@@ -136,7 +133,7 @@ class FormContainer extends Component {
                 uuid: "fd3869eb-53eb-4f81-bccd-e51502f8284b"
             },
             {
-                price: 6,
+                price: 8,
                 size: 0.025997,
                 symbol_id: "BITSTAMP_SPOT_BTC_USD",
                 taker_side: "BUY",
@@ -145,7 +142,7 @@ class FormContainer extends Component {
                 uuid: "3b7ac020-006d-4145-825d-eb8e551b655d"
             },
             {
-                price: 7,
+                price: 11,
                 size: 0.025997,
                 symbol_id: "BITSTAMP_SPOT_BTC_USD",
                 taker_side: "BUY",
@@ -160,35 +157,46 @@ class FormContainer extends Component {
 *
 */
     render() {
+        let outputPrime = '';
+        if (this.state.formSubmitted) {
+            outputPrime = <OutputPrime
+                            toDate = {this.state.toDate}
+                            fromDate = {this.state.fromDate}
+                            primes = {this.state.dailyPrimes}
+                          />
+        }
         return (
-            <Card>
-                <Card.Body>
-                    <Card.Title>
-                           Specify a to and from date
-                    </Card.Title>
-                        <form>
-                            <DatePickerComp
-                                id={'fromDate'}
-                                label={'From: '}
-                                action={this.setSelectedDate}
-                            />
-                            <DatePickerComp
-                                id={'toDate'}
-                                label={'To: '}
-                                action={this.setSelectedDate}
-                            />
-                            <Row>
-                                <Col md={3}>
-                                    <Button
-                                        title  = 'Submit'
-                                        type   = 'button'
-                                        action = {this.formSubmit}
-                                    />
-                                </Col>
-                            </Row>
-                        </form>
-                </Card.Body>
-            </Card>
+            <>
+                <Card>
+                    <Card.Body>
+                        <Card.Title>
+                               Specify a to and from date
+                        </Card.Title>
+                            <form>
+                                <DatePickerComp
+                                    id={'fromDate'}
+                                    label={'From: '}
+                                    action={this.setSelectedDate}
+                                />
+                                <DatePickerComp
+                                    id={'toDate'}
+                                    label={'To: '}
+                                    action={this.setSelectedDate}
+                                />
+                                <Row>
+                                    <Col md={3}>
+                                        <Button
+                                            title  = 'Submit'
+                                            type   = 'button'
+                                            action = {this.formSubmit}
+                                        />
+                                    </Col>
+                                </Row>
+                            </form>
+                    </Card.Body>
+                </Card>
+            {outputPrime}
+            </>
         );
     }
 }
