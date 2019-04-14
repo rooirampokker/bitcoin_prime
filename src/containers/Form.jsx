@@ -1,22 +1,20 @@
 import React, {Component} from 'react';
-import Button  from '../components/Button';
-import DatePickerComp from '../components/DatePickerComp';
+import Button             from '../components/Button';
+import DatePickerComp     from '../components/DatePickerComp';
 import { Row, Col, Card } from 'react-bootstrap';
+import Moment             from 'moment';
 import 'react-datepicker/dist/react-datepicker.css';
 import 'bootstrap/dist/css/bootstrap.css';
-import Moment from 'moment';
-
-
 
 class FormContainer extends Component {
     constructor(props) {
         super(props);
         this.apiUrl             = 'https://rest.coinapi.io';
+        this.apiKey             = 'B2AA66AA-DAC5-401C-BEAF-BA70D0049792';
         this.currency           = 'BITSTAMP_SPOT_BTC_USD';
-        //GET
-        this.getTradePath       = '';
         this.setSelectedDate    = this.setSelectedDate.bind(this);
         this.formSubmit         = this.formSubmit.bind(this);
+        this.totalTrades        = 0;
         this.formData           =  new FormData();
         this.state = {
             toDate: new Date().toISOString(),
@@ -33,29 +31,28 @@ class FormContainer extends Component {
 *
 */
     buildFetchParams(RESTMethod='GET') {
-        let thisData  = new FormData();
         let myHeaders = new Headers();
-        myHeaders.append('X-CoinAPI-Key', 'B2AA66AA-DAC5-401C-BEAF-BA70D0049792');
+        myHeaders.append('X-CoinAPI-Key', this.apiKey);
         myHeaders.append('Accept', 'application/json,');
         myHeaders.append('Accept-Encoding', 'deflate, gzip');
-        //not required for GET - Must-have for POST
+        //not required for GET - Must-have parameter composition for POST
+        //let thisData  = new FormData();
         // Object.keys(this.state).forEach(key => {
         //     this.formData.append(this[key], this.state[key]);
         // });
-        //WORKS WELL FOR LOADING FORMDATA FOR 'POST'ing AND DISABLE BODY FOR GET
-        let thisBody = RESTMethod === 'GET' ? '' : {body: this.formData};
+        //WORKS WELL FOR LOADING FORMDATA FOR 'POST'ing AND DISABLE BODY FOR GET - BE SURE TO DYNAMICALLY INCLUDE thisBody INTO RETURNPARAMS
+        //let thisBody = RESTMethod === 'GET' ? '' : {body: this.formData};
 
 
         let returnParams = {
                 method: RESTMethod,
-                headers: myHeaders,
-                thisBody,
+                headers: myHeaders
             }
         return returnParams;
     }
 
 /*
-*  /v1/trades/BITSTAMP_SPOT_BTC_USD/history?time_start=2019-04-13T21:28:00.260Z&time_end=2019-04-13T21:28:00.260Z
+*  REQUEST EXAMPLE - /v1/trades/BITSTAMP_SPOT_BTC_USD/history?time_start=2019-04-13T21:28:00.260Z&time_end=2019-04-13T21:28:00.260Z
 */
     getTradesOverPeriod() {
         return this.apiUrl+"/v1/trades/"+this.currency+"/history?time_start="+this.state.fromDate+"&time_end="+this.state.toDate;
@@ -66,24 +63,41 @@ class FormContainer extends Component {
     formSubmit(e) {
         e.preventDefault();
         if(this.validateDateSelection()) {
-             // fetch(this.getTradesOverPeriod(),this.buildFetchParams())
-             //  .then(response => response.json())
-             //     .then((response) => {
-                        let response = this.testData();
-                        this.processResponse(response);
-             //
-             //     });
+              fetch(this.getTradesOverPeriod(),this.buildFetchParams())
+                  .then(console.log("spinner on"))
+                   .then(response => response.json())
+                      .then((response) => {
+                            this.processResponse(response);
+                            console.log('spinner off');
+                      })
         }
     }
 /*
 *
 */
     processResponse(response) {
-        let primes = Object.keys(response).map(element => {
-            console.log(response[element]);
-            return response[element].price;
+        this.totalTrades = 0;
+        this.dailyPrimes = [];
+        //cycles over each response item, identifies the prime numbers and loads them into an array...
+        Object.keys(response).forEach(element => {
+            let number = Math.round(response[element].price);
+            if (this.isPrime(number)) {
+                this.dailyPrimes.push(number);
+            }
         });
-        console.log(primes);
+        console.log(this.dailyPrimes);
+    }
+/*
+*
+*/
+    isPrime(number) {
+        //cycles over all numbers from 2 onwards to check if number is divisble
+        for(let counter = 2; counter < number; counter++) {
+            if (number % counter === 0) {
+                return false; //return as non-prime the moment it's fully divisible by anything
+            }
+        }
+        return true;
     }
 /*
 * //this must eventually pop up as toaster, modal or other integrated message
@@ -104,7 +118,7 @@ class FormContainer extends Component {
     testData() {
         let testData = [
             {
-                price: 3847.45,
+                price: 4,
                 size: 0.025997,
                 symbol_id: "BITSTAMP_SPOT_BTC_USD",
                 taker_side: "BUY",
@@ -113,7 +127,7 @@ class FormContainer extends Component {
                 uuid: "41ddfe65-9e7c-4749-9f52-6f679ff20107",
             },
             {
-                price: 3848.45,
+                price: 5,
                 size: 2.05959469,
                 symbol_id: "BITSTAMP_SPOT_BTC_USD",
                 taker_side: "BUY",
@@ -122,7 +136,7 @@ class FormContainer extends Component {
                 uuid: "fd3869eb-53eb-4f81-bccd-e51502f8284b"
             },
             {
-                price: 3849.45,
+                price: 6,
                 size: 0.025997,
                 symbol_id: "BITSTAMP_SPOT_BTC_USD",
                 taker_side: "BUY",
@@ -131,7 +145,7 @@ class FormContainer extends Component {
                 uuid: "3b7ac020-006d-4145-825d-eb8e551b655d"
             },
             {
-                price: 3850.45,
+                price: 7,
                 size: 0.025997,
                 symbol_id: "BITSTAMP_SPOT_BTC_USD",
                 taker_side: "BUY",

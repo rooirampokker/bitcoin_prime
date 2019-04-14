@@ -1,5 +1,7 @@
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+Uses CoinAPI to fetch Trades over specified period and identifies all trades that are prime numbers 
+
 ## Available Scripts
 
 In the project directory, you can run:
