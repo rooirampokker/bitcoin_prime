@@ -38,9 +38,10 @@ class FormContainer extends Component {
         myHeaders.append('X-CoinAPI-Key', 'B2AA66AA-DAC5-401C-BEAF-BA70D0049792');
         myHeaders.append('Accept', 'application/json,');
         myHeaders.append('Accept-Encoding', 'deflate, gzip');
-        Object.keys(this.state).map(key => {
-            this.formData.append(this[key], this.state[key]);
-        });
+        //not required for GET - Must-have for POST
+        // Object.keys(this.state).forEach(key => {
+        //     this.formData.append(this[key], this.state[key]);
+        // });
         //WORKS WELL FOR LOADING FORMDATA FOR 'POST'ing AND DISABLE BODY FOR GET
         let thisBody = RESTMethod === 'GET' ? '' : {body: this.formData};
 
@@ -65,16 +66,24 @@ class FormContainer extends Component {
     formSubmit(e) {
         e.preventDefault();
         if(this.validateDateSelection()) {
-            fetch(this.getTradesOverPeriod(),this.buildFetchParams())
-             .then(response => response.json())
-                .then((response) => {
-                    response.forEach(element => {
-                        console.log(element.timeExchange);
-                        console.log(element.price);
-                    });
-
-                });
+             // fetch(this.getTradesOverPeriod(),this.buildFetchParams())
+             //  .then(response => response.json())
+             //     .then((response) => {
+                        let response = this.testData();
+                        this.processResponse(response);
+             //
+             //     });
         }
+    }
+/*
+*
+*/
+    processResponse(response) {
+        let primes = Object.keys(response).map(element => {
+            console.log(response[element]);
+            return response[element].price;
+        });
+        console.log(primes);
     }
 /*
 * //this must eventually pop up as toaster, modal or other integrated message
@@ -88,6 +97,50 @@ class FormContainer extends Component {
             console.log("pass dates to API for processing...");
             return true;
         }
+    }
+/*
+*
+*/
+    testData() {
+        let testData = [
+            {
+                price: 3847.45,
+                size: 0.025997,
+                symbol_id: "BITSTAMP_SPOT_BTC_USD",
+                taker_side: "BUY",
+                time_coinapi: "2019-03-14T09:04:47.9177173Z",
+                time_exchange: "2019-03-14T09:04:47.0000000Z",
+                uuid: "41ddfe65-9e7c-4749-9f52-6f679ff20107",
+            },
+            {
+                price: 3848.45,
+                size: 2.05959469,
+                symbol_id: "BITSTAMP_SPOT_BTC_USD",
+                taker_side: "BUY",
+                time_coinapi: "2019-03-14T09:04:58.5135425Z",
+                time_exchange: "2019-03-14T09:04:58.0000000Z",
+                uuid: "fd3869eb-53eb-4f81-bccd-e51502f8284b"
+            },
+            {
+                price: 3849.45,
+                size: 0.025997,
+                symbol_id: "BITSTAMP_SPOT_BTC_USD",
+                taker_side: "BUY",
+                time_coinapi: "2019-03-13T09:05:08.3046702Z",
+                time_exchange: "2019-03-13T09:05:08.0000000Z",
+                uuid: "3b7ac020-006d-4145-825d-eb8e551b655d"
+            },
+            {
+                price: 3850.45,
+                size: 0.025997,
+                symbol_id: "BITSTAMP_SPOT_BTC_USD",
+                taker_side: "BUY",
+                time_coinapi: "2019-03-13T09:05:08.3046702Z",
+                time_exchange: "2019-03-13T09:05:08.0000000Z",
+                uuid: "3b7ac020-006d-4145-825d-eb8e551b655d",
+            },
+        ]
+        return testData;
     }
 /*
 *
