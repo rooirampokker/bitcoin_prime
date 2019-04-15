@@ -2,8 +2,12 @@ import React, {Component} from 'react';
 import Button             from '../components/Button';
 import DatePickerComp     from '../components/DatePickerComp';
 import OutputPrime        from '../components/OutputPrime';
+import Spinner            from '../components/Spinner';
+import TestData           from '../components/TestData';
+import Utils              from '../utils/Utils';
 import { Row, Col, Card } from 'react-bootstrap';
 import Moment             from 'moment';
+
 import 'react-datepicker/dist/react-datepicker.css';
 import 'bootstrap/dist/css/bootstrap.css';
 
@@ -12,7 +16,10 @@ class FormContainer extends Component {
         super(props);
         this.apiUrl             = 'https://rest.coinapi.io';
         this.apiKey             = 'B2AA66AA-DAC5-401C-BEAF-BA70D0049792';
-        this.currency           = 'BITSTAMP_SPOT_BTC_USD';
+        this.currencyKey        = 'BITSTAMP_SPOT_BTC_USD';
+        this.currencySymbol     = '$';
+        this.testData           = new TestData();
+        this.utils              = new Utils();
         this.setSelectedDate    = this.setSelectedDate.bind(this);
         this.formSubmit         = this.formSubmit.bind(this);
         this.state = {
@@ -20,7 +27,8 @@ class FormContainer extends Component {
             fromDate: new Date().toISOString(),
             dailyPrimes: [],
             formSubmitted: false,
-            totalTrades: 0
+            totalTrades: 0,
+            loading: false
         }
     }
 /*
@@ -38,7 +46,6 @@ class FormContainer extends Component {
         myHeaders.append('X-CoinAPI-Key', this.apiKey);
         myHeaders.append('Accept', 'application/json,');
         myHeaders.append('Accept-Encoding', 'deflate, gzip');
-
         let returnParams = {
                 method: RESTMethod,
                 headers: myHeaders
@@ -47,28 +54,29 @@ class FormContainer extends Component {
     }
 
 /*
-*  REQUEST EXAMPLE - /v1/trades/BITSTAMP_SPOT_BTC_USD/history?time_start=2019-04-13T21:28:00.260Z&time_end=2019-04-13T21:28:00.260Z
+*  Decorator: REQUEST EXAMPLE - /v1/trades/BITSTAMP_SPOT_BTC_USD/history?time_start=2019-04-13T21:28:00.260Z&time_end=2019-04-13T21:28:00.260Z
 */
     getTradesOverPeriod() {
-        return this.apiUrl+"/v1/trades/"+this.currency+"/history?time_start="+this.state.fromDate+"&time_end="+this.state.toDate;
+        return this.apiUrl+"/v1/trades/"+this.currencyKey+"/history?time_start="+this.state.fromDate+"&time_end="+this.state.toDate;
     }
 /*
 *
  */
     formSubmit(e) {
         e.preventDefault();
-        if(this.validateDateSelection()) {
+        if(this.utils.validateDateSelection(this.state.toDate, this.state.fromDate)) {
               fetch(this.getTradesOverPeriod(),this.buildFetchParams())
-                  .then(console.log("spinner on"))
+                  .then(this.setState({loading: true}))
                    .then(response => response.json())
                       .then((response) => {
-                            //let response = this.testData(response);
+                            //let response = this.testData.getSample();
                             this.processResponse(response);
-                            console.log('spinner off');
+                            this.setState({loading: false})
                       })
         }
     }
 /*
+* allTrades =
 * {
 *  '2011-01-01': [123,234],
 *  '2011-01-02': [456,789]
@@ -84,7 +92,7 @@ class FormContainer extends Component {
             tradeCount++;
             let thisDate = response[element].time_exchange.split("T")[0];
             let number = Math.round(response[element].price);
-            if (this.isPrime(number)) {
+            if (this.utils.isPrime(number)) {
                 //just add to current date element if it already exists
                 if (allPrimes.hasOwnProperty(thisDate)) {
                     dailyPrimes.push(number);
@@ -102,93 +110,20 @@ class FormContainer extends Component {
 /*
 *
 */
-    isPrime(number) {
-        //cycles over all numbers from 2 onwards to check if number is divisble
-        for(let counter = 2; counter < number; counter++) {
-            if (number % counter === 0) {
-                return false; //return as non-prime the moment it's fully divisible by anything
-            }
-        }
-        return true;
-    }
-/*
-* //this must eventually pop up as toaster, modal or other integrated message
-*/
-    validateDateSelection() {
-        let monthsApart = Moment(this.state.toDate).diff(Moment(this.state.fromDate), 'months', true);
-        if (monthsApart > 6) {
-        alert("please ensure that start and end dates are no more than 6 months apart");
-        return false;
-        } else {
-            console.log("pass dates to API for processing...");
-            return true;
-        }
-    }
-/*
-*
-*/
-    testData() {
-        let testData = [
-            {
-                price: 4,
-                size: 0.025997,
-                symbol_id: "BITSTAMP_SPOT_BTC_USD",
-                taker_side: "BUY",
-                time_coinapi: "2019-03-14T09:04:47.9177173Z",
-                time_exchange: "2019-03-14T09:04:47.0000000Z",
-                uuid: "41ddfe65-9e7c-4749-9f52-6f679ff20107",
-            },
-            {
-                price: 5,
-                size: 2.05959469,
-                symbol_id: "BITSTAMP_SPOT_BTC_USD",
-                taker_side: "BUY",
-                time_coinapi: "2019-03-14T09:04:58.5135425Z",
-                time_exchange: "2019-03-14T09:04:58.0000000Z",
-                uuid: "fd3869eb-53eb-4f81-bccd-e51502f8284b"
-            },
-            {
-                price: 10,
-                size: 0.025997,
-                symbol_id: "BITSTAMP_SPOT_BTC_USD",
-                taker_side: "BUY",
-                time_coinapi: "2019-03-13T09:05:08.3046702Z",
-                time_exchange: "2019-03-13T09:05:08.0000000Z",
-                uuid: "3b7ac020-006d-4145-825d-eb8e551b655d"
-            },
-            {
-                price: 11,
-                size: 0.025997,
-                symbol_id: "BITSTAMP_SPOT_BTC_USD",
-                taker_side: "BUY",
-                time_coinapi: "2019-03-13T09:05:08.3046702Z",
-                time_exchange: "2019-03-13T09:05:08.0000000Z",
-                uuid: "3b7ac020-006d-4145-825d-eb8e551b655d",
-            },
-            {
-                price: 17,
-                size: 0.025997,
-                symbol_id: "BITSTAMP_SPOT_BTC_USD",
-                taker_side: "BUY",
-                time_coinapi: "2019-03-13T09:05:08.3046702Z",
-                time_exchange: "2019-03-13T09:05:08.0000000Z",
-                uuid: "3b7ac020-006d-4145-825d-eb8e551b655d",
-            },
-        ]
-        return testData;
-    }
-/*
-*
-*/
     render() {
         let outputPrime = '';
         if (this.state.formSubmitted) {
             outputPrime = <OutputPrime
-                            toDate   = {this.state.toDate}
-                            fromDate = {this.state.fromDate}
-                            primes   = {this.state.dailyPrimes}
+                            toDate      = {this.state.toDate}
+                            fromDate    = {this.state.fromDate}
+                            primes      = {this.state.dailyPrimes}
                             totalTrades = {this.state.totalTrades}
+                            currency    = {this.currencySymbol}
                           />
+        }
+        let spinner = '';
+        if (this.state.loading) {
+            spinner = <Spinner/>
         }
         return (
             <>
@@ -217,9 +152,16 @@ class FormContainer extends Component {
                                         />
                                     </Col>
                                 </Row>
+                                <Row>
+                                    <Col md={12}
+                                         className='blockquote text-center'>
+                                        {spinner}
+                                    </Col>
+                                </Row>
                             </form>
                     </Card.Body>
                 </Card>
+
             {outputPrime}
             </>
         );

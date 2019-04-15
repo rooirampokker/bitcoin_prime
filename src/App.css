@@ -21,3 +21,7 @@
   -webkit-font-feature-settings: 'liga';
   -webkit-font-smoothing: antialiased;
 }
+
+.tradeValue {
+  color: #4D4E4F;
+}
