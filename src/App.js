@@ -3,9 +3,6 @@ import FormContainer from './containers/Form';
 import './App.css';
 
 class App extends Component {
-  constructor(props) {
-    super(props);
-  }
 /*
 *
 */

@@ -6,10 +6,10 @@ class Spinner extends Component {
     render() {
         return(
             <Loader
-                type="Bars"
-                color="#00BFFF"
-                height="50"
-                width="300"
+                type   = 'Bars'
+                color  = '#00BFFF'
+                height = '50'
+                width  = '300'
             />
         );
     }

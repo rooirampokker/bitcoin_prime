@@ -8,15 +8,16 @@ class DatePickerComp extends Component {
         this.state = {
            thisDate: new Date()
         };
-        this.label = props.label;
-        this.id    = props.id;
+        this.label           = props.label;
+        this.id              = props.id;
         this.setSelectedDate = props.action;
-        this.handleDate = this.handleDate.bind(this);
+        this.handleDate      = this.handleDate.bind(this);
     }
 /*
 *
 */
     handleDate(date) {
+        //sets component date value and invokes callback from parent. this.id is used in callBack to all same component to set different values
         this.setState({thisDate: date}, () => this.setSelectedDate(this.state.thisDate, this.id));
     }
 /*
@@ -30,12 +31,11 @@ class DatePickerComp extends Component {
                 </Col>
                 <Col md={11}>
                     <DatePicker
-                        selected={this.state.thisDate}
-                        onChange={this.handleDate}
-                        //2016-01-01T00:00:00
-                        dateFormat="YYYY-MM-dd"
-                        id={this.id}
-                        className='form-control'/>
+                        selected   = {this.state.thisDate}
+                        onChange   = {this.handleDate}
+                        dateFormat = "YYYY-MM-dd"
+                        id         = {this.id}
+                        className  = 'form-control'/>
                 </Col>
             </Row>
         );

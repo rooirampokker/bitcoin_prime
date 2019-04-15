@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
 import { Row, Col, Card } from 'react-bootstrap';
 import Utils              from '../utils/Utils';
-import Moment             from 'moment';
 
 class OutputPrime extends Component {
     constructor(props) {

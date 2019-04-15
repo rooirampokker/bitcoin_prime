@@ -6,7 +6,6 @@ import Spinner            from '../components/Spinner';
 import TestData           from '../components/TestData';
 import Utils              from '../utils/Utils';
 import { Row, Col, Card } from 'react-bootstrap';
-import Moment             from 'moment';
 
 import 'react-datepicker/dist/react-datepicker.css';
 import 'bootstrap/dist/css/bootstrap.css';
@@ -23,12 +22,12 @@ class FormContainer extends Component {
         this.setSelectedDate    = this.setSelectedDate.bind(this);
         this.formSubmit         = this.formSubmit.bind(this);
         this.state = {
-            toDate: new Date().toISOString(),
-            fromDate: new Date().toISOString(),
-            dailyPrimes: [],
+            toDate:        new Date().toISOString(),
+            fromDate:      new Date().toISOString(),
+            dailyPrimes:   [],
             formSubmitted: false,
-            totalTrades: 0,
-            loading: false
+            totalTrades:   0,
+            loading:       false
         }
     }
 /*
@@ -85,13 +84,13 @@ class FormContainer extends Component {
 */
     processResponse(response) {
         let dailyPrimes = [];
-        let allPrimes = {};
-        let tradeCount = 0;
+        let allPrimes   = {};
+        let tradeCount  = 0;
         //cycles over each response item, identifies the prime numbers and loads them into an JSON structure...
         Object.keys(response).forEach(element => {
             tradeCount++;
             let thisDate = response[element].time_exchange.split("T")[0];
-            let number = Math.round(response[element].price);
+            let number   = Math.round(response[element].price);
             if (this.utils.isPrime(number)) {
                 //just add to current date element if it already exists
                 if (allPrimes.hasOwnProperty(thisDate)) {
@@ -134,14 +133,14 @@ class FormContainer extends Component {
                         </Card.Title>
                             <form>
                                 <DatePickerComp
-                                    id={'fromDate'}
-                                    label={'From: '}
-                                    action={this.setSelectedDate}
+                                    id     = {'fromDate'}
+                                    label  = {'From: '}
+                                    action = {this.setSelectedDate}
                                 />
                                 <DatePickerComp
-                                    id={'toDate'}
-                                    label={'To: '}
-                                    action={this.setSelectedDate}
+                                    id     = {'toDate'}
+                                    label  = {'To: '}
+                                    action = {this.setSelectedDate}
                                 />
                                 <Row>
                                     <Col md={3}>
@@ -154,7 +153,7 @@ class FormContainer extends Component {
                                 </Row>
                                 <Row>
                                     <Col md={12}
-                                         className='blockquote text-center'>
+                                         className = 'blockquote text-center'>
                                         {spinner}
                                     </Col>
                                 </Row>
